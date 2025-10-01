@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNI Services</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -19,7 +20,7 @@
             background: #ffffff;
         }
 
-        /* Animated Background */
+        /* Animated Background with Parallax */
         .background {
             position: fixed;
             top: 0;
@@ -36,6 +37,7 @@
             border-radius: 50%;
             animation: rise 15s infinite ease-in;
             opacity: 0.6;
+            will-change: transform;
         }
 
         .bubble:nth-child(1) { 
@@ -108,15 +110,16 @@
             }
         }
 
-        /* Navigation */
+        /* Fancy Navigation */
         nav {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
-            padding: 1rem 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 247, 250, 0.95) 100%);
+            backdrop-filter: blur(15px);
+            padding: 0;
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .nav-container {
@@ -126,61 +129,179 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 80px;
         }
 
         .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #2c3e50;
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            bottom: -5px;
+            left: 0;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover::before {
+            transform: scaleX(1);
         }
 
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 0;
             list-style: none;
+            align-items: center;
+        }
+
+        .nav-links li {
+            position: relative;
         }
 
         .nav-links a {
             text-decoration: none;
-            color: #333;
-            font-weight: 500;
-            transition: color 0.3s;
+            color: #2c3e50;
+            font-weight: 600;
+            padding: 1.5rem 1.5rem;
+            display: block;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::before {
+            width: 80%;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-links a:hover::after {
+            transform: translateY(0);
         }
 
         .nav-links a:hover {
-            color: #3498db;
+            color: #667eea;
+            transform: translateY(-2px);
         }
 
         .menu-toggle {
             display: none;
             flex-direction: column;
             cursor: pointer;
+            gap: 4px;
         }
 
         .menu-toggle span {
-            width: 25px;
+            width: 28px;
             height: 3px;
-            background: #333;
-            margin: 3px 0;
-            transition: 0.3s;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover span {
+            background: linear-gradient(90deg, #764ba2, #667eea);
+        }
+
+        .menu-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(8px, 8px);
+        }
+
+        .menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        /* Parallax Sections */
+        .parallax-section {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .parallax-section.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         /* Hero Section */
         .hero {
             text-align: center;
-            padding: 6rem 2rem;
+            padding: 8rem 2rem 6rem;
             color: #2c3e50;
+            position: relative;
         }
 
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 4rem;
             margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 1s ease;
         }
 
         .hero p {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             margin-bottom: 2rem;
             color: #555;
+            animation: fadeInUp 1s ease 0.2s backwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Services Section */
@@ -192,9 +313,25 @@
 
         .section-title {
             text-align: center;
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             margin-bottom: 3rem;
             color: #2c3e50;
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
         }
 
         .services-grid {
@@ -205,28 +342,52 @@
 
         .service-card {
             background: #ffffff;
-            padding: 2rem;
+            padding: 2.5rem;
             border-radius: 20px;
             box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             border: 1px solid #f0f0f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .service-card:hover::before {
+            left: 100%;
         }
 
         .service-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.3);
         }
 
         .service-icon {
-            font-size: 3rem;
+            font-size: 3.5rem;
             margin-bottom: 1rem;
+            display: inline-block;
+            transition: transform 0.4s ease;
+        }
+
+        .service-card:hover .service-icon {
+            transform: scale(1.2) rotate(5deg);
         }
 
         .service-card h3 {
             color: #2c3e50;
             margin-bottom: 1rem;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
         }
 
         .service-card p {
@@ -242,63 +403,108 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
             z-index: 2000;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal-content {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%) scale(0.9);
             background: white;
             padding: 3rem;
-            border-radius: 20px;
-            max-width: 700px;
+            border-radius: 25px;
+            max-width: 900px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlide 0.4s ease forwards;
+        }
+
+        @keyframes modalSlide {
+            to {
+                transform: translate(-50%, -50%) scale(1);
+            }
         }
 
         .close-btn {
             position: absolute;
             top: 1rem;
             right: 1rem;
-            font-size: 2rem;
+            font-size: 2.5rem;
             cursor: pointer;
             color: #666;
-            transition: color 0.3s;
+            transition: all 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #f8f9fa;
         }
 
         .close-btn:hover {
-            color: #333;
+            color: #fff;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transform: rotate(90deg);
         }
 
         .package {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 15px;
-            margin: 1rem 0;
-            transition: transform 0.3s, box-shadow 0.3s;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 2rem;
+            border-radius: 20px;
+            margin: 1.5rem 0;
+            transition: all 0.3s ease;
             border: 2px solid #e9ecef;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .package::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .package:hover::before {
+            transform: scaleY(1);
         }
 
         .package:hover {
-            transform: scale(1.02);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transform: translateX(8px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+            border-color: rgba(102, 126, 234, 0.3);
         }
 
         .package h4 {
             color: #2c3e50;
             margin-bottom: 0.5rem;
+            font-size: 1.3rem;
         }
 
         .package .price {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: bold;
-            color: #3498db;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin: 0.5rem 0;
         }
 
@@ -309,7 +515,7 @@
         }
 
         .package li {
-            padding: 0.3rem 0;
+            padding: 0.4rem 0;
             color: #555;
         }
 
@@ -324,7 +530,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 1rem;
-            border-radius: 10px;
+            border-radius: 12px;
             text-align: center;
             margin-top: 1rem;
             font-weight: bold;
@@ -333,23 +539,46 @@
 
         .ref-label {
             font-size: 0.9rem;
-            opacity: 0.9;
+            opacity: 0.95;
         }
 
         .ref-code {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             margin-top: 0.3rem;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+        }
+
+        .qr-section {
+            text-align: center;
+            margin: 2rem 0;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 20px;
+            border: 2px solid #e9ecef;
+        }
+
+        .qr-section h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .qr-code {
+            display: inline-block;
+            padding: 1rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
         }
 
         .instruction-text {
             text-align: center;
             margin-top: 1.5rem;
-            padding: 1rem;
-            background: #fff3cd;
-            border-radius: 10px;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, #fff3cd 0%, #fff9e6 100%);
+            border-radius: 15px;
             color: #856404;
             font-size: 0.95rem;
+            border: 2px solid #ffeaa7;
         }
 
         /* Contact Section */
@@ -360,10 +589,10 @@
         }
 
         .contact-form {
-            background: #ffffff;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
             padding: 3rem;
-            border-radius: 20px;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+            border-radius: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
             border: 1px solid #f0f0f0;
         }
 
@@ -374,8 +603,8 @@
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
-            color: #333;
-            font-weight: 500;
+            color: #2c3e50;
+            font-weight: 600;
         }
 
         .form-group input,
@@ -383,15 +612,18 @@
             width: 100%;
             padding: 1rem;
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 1rem;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
+            background: white;
         }
 
         .form-group input:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #3498db;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
         }
 
         .form-group textarea {
@@ -401,27 +633,33 @@
 
         .submit-btn {
             width: 100%;
-            padding: 1rem;
-            background: #3498db;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s, transform 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
         }
 
         .submit-btn:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
         }
 
         /* Footer */
         footer {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #2c3e50 0%, #3d5a80 100%);
             padding: 3rem 2rem;
             margin-top: 4rem;
-            border-top: 1px solid #e9ecef;
+            color: white;
         }
 
         .footer-content {
@@ -433,28 +671,31 @@
         }
 
         .footer-section h3 {
-            color: #2c3e50;
+            color: white;
             margin-bottom: 1rem;
         }
 
         .footer-section p,
         .footer-section a {
-            color: #666;
+            color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
             display: block;
             margin: 0.5rem 0;
+            transition: color 0.3s ease;
         }
 
         .footer-section a:hover {
-            color: #3498db;
+            color: #fff;
+            transform: translateX(5px);
+            display: inline-block;
         }
 
         .footer-bottom {
             text-align: center;
             margin-top: 2rem;
             padding-top: 2rem;
-            border-top: 1px solid #e0e0e0;
-            color: #666;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
         }
 
         /* Responsive */
@@ -470,13 +711,17 @@
                 right: 0;
                 background: rgba(255, 255, 255, 0.98);
                 flex-direction: column;
-                padding: 2rem;
+                padding: 0;
                 display: none;
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             }
 
             .nav-links.active {
                 display: flex;
+            }
+
+            .nav-links a {
+                padding: 1.2rem 2rem;
             }
 
             .hero h1 {
@@ -490,11 +735,29 @@
             .modal-content {
                 padding: 2rem;
             }
+
+            .section-title {
+                font-size: 2.2rem;
+            }
+        }
+
+        /* Scroll Progress Bar */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            z-index: 10000;
+            transition: width 0.1s ease;
         }
     </style>
 </head>
 <body>
-    <div class="background">
+    <div class="scroll-progress" id="scrollProgress"></div>
+    
+    <div class="background" id="bgParallax">
         <div class="bubble"></div>
         <div class="bubble"></div>
         <div class="bubble"></div>
@@ -507,7 +770,7 @@
     <nav>
         <div class="nav-container">
             <div class="logo">UniHelp</div>
-            <div class="menu-toggle" onclick="toggleMenu()">
+            <div class="menu-toggle" id="menuToggle" onclick="toggleMenu()">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -521,17 +784,17 @@
         </div>
     </nav>
 
-    <section class="hero" id="home">
+    <section class="hero parallax-section" id="home">
         <h1>Need quick help</h1>
         <p>Are you looking for Affordable & budget friendly services - We Making life easier, one task at a time</p>
     </section>
 
-    <section class="services" id="services">
+    <section class="services parallax-section" id="services">
         <h2 class="section-title">Our Services</h2>
         <div class="services-grid">
             <div class="service-card" onclick="openModal('car')">
                 <div class="service-icon">🚗</div>
-                <h3>Vechile Cleaning</h3>
+                <h3>Vehicle Cleaning</h3>
                 <p>Professional car, van, jeep or truck washing and detailing services to keep your vehicle spotless inside and out.</p>
             </div>
             <div class="service-card" onclick="openModal('house')">
@@ -557,7 +820,7 @@
         </div>
     </section>
 
-    <section class="contact" id="contact">
+    <section class="contact parallax-section" id="contact">
         <h2 class="section-title">Get In Touch</h2>
         <div class="contact-form">
             <form onsubmit="handleSubmit(event)">
@@ -616,7 +879,6 @@
         </div>
     </footer>
 
-    <!-- Modal -->
     <div class="modal" id="serviceModal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
@@ -748,15 +1010,74 @@
             }
         };
 
+        // Parallax scroll effect
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const bg = document.getElementById('bgParallax');
+            bg.style.transform = `translateY(${scrolled * 0.5}px)`;
+
+            // Update scroll progress bar
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled2 = (winScroll / height) * 100;
+            document.getElementById('scrollProgress').style.width = scrolled2 + '%';
+
+            // Parallax sections
+            const sections = document.querySelectorAll('.parallax-section');
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                const isVisible = rect.top < window.innerHeight * 0.75;
+                if (isVisible) {
+                    section.classList.add('visible');
+                }
+            });
+        });
+
+        // Initialize parallax sections on load
+        window.addEventListener('load', () => {
+            const sections = document.querySelectorAll('.parallax-section');
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                const isVisible = rect.top < window.innerHeight * 0.75;
+                if (isVisible) {
+                    section.classList.add('visible');
+                }
+            });
+        });
+
         function toggleMenu() {
             const navLinks = document.getElementById('navLinks');
+            const menuToggle = document.getElementById('menuToggle');
             navLinks.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+        }
+
+        function generateQRCode(text, elementId) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = '';
+            new QRCode(container, {
+                text: text,
+                width: 200,
+                height: 200,
+                colorDark: "#2c3e50",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
         }
 
         function openModal(service) {
             const modal = document.getElementById('serviceModal');
             const content = document.getElementById('modalContent');
             const serviceData = services[service];
+
+            // Contact info for QR code
+            const contactInfo = `BEGIN:VCARD
+VERSION:3.0
+FN:UniHelp Services
+TEL:+6422 555 8494
+EMAIL:yasaslokuge1438@gmail.com
+NOTE:Service: ${serviceData.title}
+END:VCARD`;
 
             let packagesHTML = serviceData.packages.map((pkg, index) => {
                 const refNumber = `${serviceData.prefix}-${pkg.ref}-${String(index + 1).padStart(3, '0')}`;
@@ -778,12 +1099,22 @@
                 <h2>${serviceData.title}</h2>
                 <p style="margin-bottom: 2rem; color: #666;">Choose your preferred package and use the reference number when contacting us:</p>
                 ${packagesHTML}
+                <div class="qr-section">
+                    <h3>📱 Scan to Add Contact</h3>
+                    <p style="color: #666; margin-bottom: 1rem;">Scan this QR code with your phone to save our contact details</p>
+                    <div class="qr-code" id="qrcode"></div>
+                </div>
                 <div class="instruction-text">
-                    💡 Copy the reference number of your chosen package and  call or text us.
+                    💡 Copy the reference number of your chosen package and call or text us at <strong>+64 22 555 8494</strong>
                 </div>
             `;
 
             modal.style.display = 'block';
+            
+            // Generate QR code after modal content is rendered
+            setTimeout(() => {
+                generateQRCode(contactInfo, 'qrcode');
+            }, 100);
         }
 
         function closeModal() {
@@ -807,6 +1138,24 @@
                 closeModal();
             }
         }
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    // Close mobile menu if open
+                    if (window.innerWidth <= 768) {
+                        toggleMenu();
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>
